@@ -4,3 +4,4 @@ dist
 *.local
 .vite
 _source-assets/_contact.png
+tsconfig.tsbuildinfo
