@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import Layout from '@/components/Layout'
-import Fleet from '@/pages/Fleet'
+import Layout from '@/components/layout'
+import Fleet from '@/pages/fleet'
 import '@/styles/index.css'
 
 createRoot(document.getElementById('root')!).render(

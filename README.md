@@ -19,15 +19,28 @@ npm run preview  # serve dist/ locally
 
 ## Deploying to Hostinger
 
-1. `npm run build`
-2. Upload **everything inside `dist/`** (not the folder itself) into `public_html`,
-   via hPanel File Manager or FTP. Include the dotfile `.htaccess`.
-3. Confirm `public_html/send-quote.php` is there and readable.
-4. In hPanel → Emails, make sure the mailbox `info@sbluxuryrentals.co.za` exists.
+Same pattern as `eye-candy-customs-website`: Hostinger's Git deploy clones a branch
+into `public_html`, so the built site gets its own branch with `index.html` at the root.
+
+```bash
+npm run deploy    # build, then publish dist/ to the `deploy` branch
+```
+
+Then point hPanel → Git at `origin/deploy` (first time only) and pull. The script
+refuses to publish if `send-quote.php` or `.htaccess` is missing from the build,
+because losing either is invisible until a lead goes missing.
+
+**Manual alternative:** `npm run package` zips `dist/` — upload and Extract in
+hPanel File Manager. If you upload by hand instead, include the dotfile `.htaccess`;
+File Manager hides it by default.
+
+Either way, once:
+
+1. In hPanel → Emails, make sure the mailbox `info@sbluxuryrentals.co.za` exists.
    PHP `mail()` on Hostinger requires the `From:` address to be a real mailbox on
    the domain, which is why the script sends **from** `info@` and sets
    `Reply-To:` to the person filling in the form.
-5. Delete the old builder site from the domain so it stops serving.
+2. Delete the old builder site from the domain so it stops serving.
 
 ### What `.htaccess` does
 
@@ -37,11 +50,16 @@ npm run preview  # serve dist/ locally
 - serves a real `404.html` — this is a multi-page build, so there is deliberately **no**
   catch-all rewrite to `index.html` (that trick returns 200 for URLs that do not exist,
   which Google reads as a soft 404)
-- long cache on hashed assets, no cache on HTML
+- long cache on hashed assets under `/assets`, and `max-age=0, must-revalidate` on
+  every HTML response. That last one is keyed off the **request path**, not a
+  `FilesMatch` on `\.html$` — every real URL here is a directory URL (`/`, `/fleet/`,
+  `/quote/`, `/terms/`) and none of those match that pattern. Without it, Hostinger's
+  `hcdn` edge keeps serving cached HTML that points at hashed chunks the next build
+  has already deleted, and the page loads with 404'd JS and CSS.
 
 ## The quote form
 
-`src/pages/Quote.tsx` POSTs JSON to `/send-quote.php`, which emails
+`src/pages/quote.tsx` POSTs JSON to `/send-quote.php`, which emails
 **info@sbluxuryrentals.co.za** — the same address the old form used.
 
 - honeypot field + header-injection stripping + length caps
@@ -50,7 +68,7 @@ npm run preview  # serve dist/ locally
   server never costs a lead
 - `?car=<slug>` pre-ticks a car (the selector and fleet page both link that way)
 
-Moving off PHP later? Point the `fetch` in `Quote.tsx` at a Formspree/Web3Forms
+Moving off PHP later? Point the `fetch` in `quote.tsx` at a Formspree/Web3Forms
 endpoint. Nothing else changes.
 
 ## Content and assets

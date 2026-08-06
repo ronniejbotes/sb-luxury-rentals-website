@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "postbuild": "node scripts/postbuild.mjs"
+    "postbuild": "node scripts/postbuild.mjs",
+    "deploy": "npm run build && bash scripts/publish-deploy-branch.sh",
+    "package": "npm run build && cd dist && zip -r ../sb-luxury-rentals.zip . -x '.DS_Store' && cd .. && echo 'Upload sb-luxury-rentals.zip to public_html and Extract.'"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

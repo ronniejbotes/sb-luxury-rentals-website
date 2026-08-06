@@ -1,7 +1,7 @@
 import { ArrowUpRight, Clock, MapPin, ShieldCheck, UserRound } from 'lucide-react'
-import CarSelector from '@/components/CarSelector'
-import Reveal from '@/components/Reveal'
-import { Section, SectionHead } from '@/components/Section'
+import CarSelector from '@/components/car-selector'
+import Reveal from '@/components/reveal'
+import { Section, SectionHead } from '@/components/section'
 import { SITE } from '@/data/site'
 import { VEHICLES } from '@/data/vehicles'
 

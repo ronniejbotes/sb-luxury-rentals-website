@@ -36,23 +36,48 @@ ErrorDocument 404 /404.html
   AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
 </IfModule>
 
+# ---------------------------------------------------------------------------
+# Caching. Files under /assets are content-hashed by Vite, so they are immutable.
+#
+# HTML must never be held by a CDN. Hostinger's `hcdn` edge sits in front of
+# this server, and HTML it has cached will keep being served after a new build
+# has already deleted the hashed chunks that HTML points at — the page then
+# loads with 404'd JS and CSS. Anything answering with HTML has to say
+# max-age=0 and mean it.
+#
+# Keying off a FilesMatch on \.html$ is not enough: every real URL on this site
+# is a directory URL (`/`, `/fleet/`, `/quote/`, `/terms/`) and none of them
+# match that pattern, so the request path is what gets tested instead.
+#
+# `Header always` matters — plain `Header set` only touches 2xx responses.
+# ---------------------------------------------------------------------------
 <IfModule mod_expires.c>
   ExpiresActive On
-  # Hashed build assets are immutable
-  <FilesMatch "\.(js|css|woff2)$">
-    ExpiresDefault "access plus 1 year"
-    Header set Cache-Control "public, max-age=31536000, immutable"
-  </FilesMatch>
-  <FilesMatch "\.(webp|png|jpe?g|svg|ico)$">
-    ExpiresDefault "access plus 6 months"
-  </FilesMatch>
-  <FilesMatch "\.(html|php)$">
-    ExpiresDefault "access plus 0 seconds"
-    Header set Cache-Control "public, max-age=0, must-revalidate"
-  </FilesMatch>
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/webp "access plus 6 months"
+  ExpiresByType image/jpeg "access plus 6 months"
+  ExpiresByType image/png "access plus 6 months"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+<IfModule mod_setenvif.c>
+  SetEnvIf Request_URI "\.html$" SBLR_HTML=1
+  SetEnvIf Request_URI "/$"      SBLR_HTML=1
+  SetEnvIf Request_URI "^/$"     SBLR_HTML=1
 </IfModule>
 
 <IfModule mod_headers.c>
+  Header always set Cache-Control "public, max-age=0, must-revalidate" env=SBLR_HTML
+  Header always unset Expires env=SBLR_HTML
+
+  <FilesMatch "\.(js|css|woff2)$">
+    Header always set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Not `Header setifempty`: LiteSpeed does not implement it and emits the
+  # directive name as a literal response header instead.
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set X-Frame-Options "SAMEORIGIN"

@@ -1,6 +1,6 @@
 import { ArrowUpRight } from 'lucide-react'
-import Reveal from '@/components/Reveal'
-import { Section } from '@/components/Section'
+import Reveal from '@/components/reveal'
+import { Section } from '@/components/section'
 import { SITE } from '@/data/site'
 import { VEHICLES } from '@/data/vehicles'
 
