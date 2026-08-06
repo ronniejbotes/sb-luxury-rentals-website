@@ -1,0 +1,62 @@
+# SB Luxury Rentals — Hostinger (Apache/LiteSpeed) configuration.
+# Upload the whole contents of dist/ into public_html; this file goes with it.
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Force HTTPS
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # Force the non-www canonical host
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+  # 301s from the old Hostinger-builder URLs so existing links and rankings survive
+  RewriteRule ^about-sb-luxury-rentals/?$      /fleet/ [R=301,L]
+  RewriteRule ^quote-for-your-luxury-rental/?$ /quote/ [R=301,L]
+  RewriteRule ^luxury-rentals-terms/?$         /terms/ [R=301,L]
+  RewriteRule ^get-quote/?$                    /quote/ [R=301,L]
+
+  # Pretty URLs: /fleet -> /fleet/ (mod_dir does this, but be explicit)
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteRule ^(.*)$ /$1/ [R=301,L]
+</IfModule>
+
+# Real 404s. This is a multi-page static build, so there is deliberately no
+# catch-all rewrite to index.html — nonexistent URLs must not return 200.
+ErrorDocument 404 /404.html
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  # Hashed build assets are immutable
+  <FilesMatch "\.(js|css|woff2)$">
+    ExpiresDefault "access plus 1 year"
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(webp|png|jpe?g|svg|ico)$">
+    ExpiresDefault "access plus 6 months"
+  </FilesMatch>
+  <FilesMatch "\.(html|php)$">
+    ExpiresDefault "access plus 0 seconds"
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+AddType image/webp .webp

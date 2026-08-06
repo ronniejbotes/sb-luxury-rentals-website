@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Parkade After Dark — the palette is the concrete, the cars are the colour. */
+  --color-void: #0a0b0d;
+  --color-surface: #121417;
+  --color-raised: #1b1f24;
+  --color-hairline: #262b31;
+  --color-bone: #f4f1ea;
+  --color-steel: #a8aeb6;
+  --color-dim: #6b727c;
+  --color-bronze: #d9b168;
+  --color-magenta: #ff2e7e;
+
+  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
+  --font-mono: 'Martian Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --ease-stage: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  :root {
+    /* Overwritten live by the car selector so the whole page takes the car's colour. */
+    --accent: #d9b168;
+    color-scheme: dark;
+  }
+
+  * {
+    border-color: var(--color-hairline);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: #0a0b0d;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+    text-transform: uppercase;
+  }
+}
+
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+}
+
+/* Photographic concrete grain, lifted in spirit from their own parkade shots. */
+@utility grain {
+  position: relative;
+}
+@utility grain-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* A single fluoro tube — the section divider for the whole site. */
+@utility tube {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--accent) 55%, transparent) 20%,
+    color-mix(in oklab, var(--accent) 80%, white 10%) 50%,
+    color-mix(in oklab, var(--accent) 55%, transparent) 80%,
+    transparent
+  );
+  box-shadow: 0 0 24px 1px color-mix(in oklab, var(--accent) 30%, transparent);
+}
+
+@layer components {
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 620ms var(--ease-snap),
+      transform 620ms var(--ease-snap);
+  }
+  .reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Numberplate device — SA plates, set the way SA plates are set. */
+  .plate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    padding: 0.38rem 0.6rem 0.34rem;
+    border-radius: 3px;
+    background: #eceae4;
+    color: #14161a;
+    border: 1px solid #b9b6ae;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* Colour tweens survive; movement does not. */
+  [data-accent-tween] {
+    transition-duration: 300ms !important;
+  }
+}
