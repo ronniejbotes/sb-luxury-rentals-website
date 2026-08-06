@@ -33,7 +33,7 @@ export default function Header({ current }: { current: string }) {
           solid ? 'bg-void/85 backdrop-blur-xl' : 'bg-transparent'
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-4 sm:px-8">
+        <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between px-4 pt-4 sm:px-8">
           <a href="/" aria-label={`${SITE.name} home`} className="shrink-0">
             <img src="/img/logo-sm.png" alt={SITE.name} width={44} height={47} className="h-10 w-auto" />
           </a>
@@ -77,7 +77,7 @@ export default function Header({ current }: { current: string }) {
       </header>
 
       {open && (
-        <div className="fixed inset-0 z-[64] bg-void/97 pt-32 backdrop-blur-xl md:hidden">
+        <div className="fixed inset-0 z-[64] bg-void/97 pt-36 backdrop-blur-xl md:hidden">
           <nav className="flex flex-col gap-1 px-6">
             {NAV.map((n) => (
               <a
